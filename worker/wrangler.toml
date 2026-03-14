@@ -1,0 +1,15 @@
+name = "devvault-api"
+main = "src/index.ts"
+compatibility_date = "2025-03-14"
+
+[[r2_buckets]]
+binding = "VAULT_BUCKET"
+bucket_name = "devvault"
+
+[site]
+bucket = "../web/dist"
+
+# Uncomment after first deploy and DNS setup:
+# [routes]
+# pattern = "vault.joaomariano.dev/*"
+# custom_domain = true
