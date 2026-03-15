@@ -64,6 +64,30 @@ export async function listDirectory(
   };
 }
 
+// List all file keys under a prefix (recursive, for zip download)
+export async function getAllFilesInPrefix(
+  bucket: R2Bucket,
+  prefix: string,
+  maxFiles = 5000
+): Promise<{ key: string; size: number }[]> {
+  const files: { key: string; size: number }[] = [];
+  let cursor: string | undefined;
+
+  while (files.length < maxFiles) {
+    const listed = await bucket.list({ prefix, limit: 1000, cursor });
+
+    for (const obj of listed.objects) {
+      files.push({ key: obj.key, size: obj.size });
+      if (files.length >= maxFiles) break;
+    }
+
+    if (!listed.truncated) break;
+    cursor = listed.cursor;
+  }
+
+  return files;
+}
+
 // F4: Capped search — scans at most SEARCH_MAX_PAGES pages
 // F9: Removed broken cursor-based pagination — search is always from the start
 export async function searchFiles(

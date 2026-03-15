@@ -59,6 +59,10 @@ obj/**
 .DS_Store
 Thumbs.db
 desktop.ini
+.Trashes/**
+.Spotlight-V100/**
+.fseventsd/**
+.TemporaryItems/**
 
 # Environment / secrets / credentials
 .env

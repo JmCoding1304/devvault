@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import type { Env } from '../types';
-import { listDirectory, searchFiles, getFileHead, getFileForPreview, getFileForDownload } from '../lib/r2';
+import { listDirectory, searchFiles, getFileHead, getFileForPreview, getFileForDownload, getAllFilesInPrefix } from '../lib/r2';
 import { sanitizePath, safeContentDisposition } from '../lib/sanitize';
+import { zipFolder } from '../lib/zip';
 
 const MAX_PREVIEW_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -88,6 +89,40 @@ files.get('/preview/*', async (c) => {
       // F6: Security headers to prevent XSS from backed-up HTML/SVG files
       'Content-Security-Policy': 'sandbox',
       'X-Content-Type-Options': 'nosniff',
+    },
+  });
+});
+
+// Download folder as zip
+files.get('/download-folder/*', async (c) => {
+  const rawPath = c.req.path.replace('/api/download-folder/', '');
+  const path = rawPath === '' ? '' : sanitizePath(rawPath);
+
+  if (path === null) {
+    return c.json({ error: 'Invalid path' }, 400);
+  }
+
+  const prefix = path ? (path.endsWith('/') ? path : path + '/') : '';
+  const folderName = prefix ? prefix.replace(/\/$/, '').split('/').pop()! : 'vault';
+
+  const allFiles = await getAllFilesInPrefix(c.env.VAULT_BUCKET, prefix);
+
+  if (allFiles.length === 0) {
+    return c.json({ error: 'No files found in directory' }, 404);
+  }
+
+  const { readable, writable } = new TransformStream();
+
+  // Stream zip in background
+  c.executionCtx.waitUntil(
+    zipFolder(c.env.VAULT_BUCKET, allFiles, prefix, writable)
+  );
+
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': safeContentDisposition(`${folderName}.zip`),
+      'Transfer-Encoding': 'chunked',
     },
   });
 });

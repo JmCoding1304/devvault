@@ -40,3 +40,7 @@ export function getDownloadUrl(key: string): string {
 export function getPreviewUrl(key: string): string {
   return `/api/preview/${key}`;
 }
+
+export function getFolderDownloadUrl(path: string): string {
+  return `/api/download-folder/${path}`;
+}

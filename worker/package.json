@@ -10,12 +10,13 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "fflate": "^0.8.2",
     "hono": "^4.7.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250313.0",
+    "typescript": "^5.7.0",
     "vitest": "^3.0.0",
-    "wrangler": "^4.0.0",
-    "typescript": "^5.7.0"
+    "wrangler": "^4.0.0"
   }
 }

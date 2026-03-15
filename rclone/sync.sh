@@ -88,12 +88,12 @@ trap 'echo ""; echo "Backup interrupted."; exit 1' INT TERM
 rclone "$RCLONE_CMD" \
   "$SOURCE" \
   "$REMOTE" \
-  --filter-from "$FILTER_FILE" \
+  --exclude-from "$FILTER_FILE" \
   --transfers 8 \
   --checksum \
   --progress \
   --stats-one-line \
-  "${EXTRA_FLAGS[@]}" \
+  ${EXTRA_FLAGS[@]+"${EXTRA_FLAGS[@]}"} \
   -v
 
 echo ""
